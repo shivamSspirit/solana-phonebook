@@ -3,16 +3,15 @@
 [features]
 seeds = false
 skip-lint = false
-
-[programs.localnet]
-counter = "2E8rHGgWncET68B86NGsVq6tiNnzLgFEZ2F69mU73ijY"
+[programs.devnet]
+phonebook = "5XRwMzzgnQcHa3mi7p1gUdCVw8ed4LEnBVExMeFcq1wv"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
-wallet = "~/.config/solana/id.json"
+cluster = "Devnet"
+wallet = "/Users/shivamsoni/.config/solana/id.json"
 
 [scripts]
 test = "../node_modules/.bin/nx run anchor:jest"
@@ -23,6 +22,7 @@ shutdown_wait = 2000
 upgradeable = false
 
 [test.validator]
-bind_address = "127.0.0.1"
 ledger = ".anchor/test-ledger"
-rpc_port = 8899
+
+
+

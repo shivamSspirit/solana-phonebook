@@ -1,25 +1,44 @@
 'use client';
 
 import { Keypair, PublicKey } from '@solana/web3.js';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ellipsify } from '../ui/ui-layout';
 import { ExplorerLink } from '../cluster/cluster-ui';
+import { useWallet } from '@solana/wallet-adapter-react';
 import {
   useCounterProgram,
   useCounterProgramAccount,
-} from './counter-data-access';
+} from './phonebook-data-access';
 
 export function CounterCreate() {
-  const { initialize } = useCounterProgram();
+  const { createPhoneBookEntry } = useCounterProgram();
+  const { publicKey } = useWallet();
+  const [userName, setUserName] = useState("");
+  const [userNumber, setuserNumber] = useState("");
+  const [content, setcontent] = useState("");
+
+  const isDataValid = userName.trim() !== "" && userNumber.trim() !== "" && content.trim() !== "";
+
+  const handleSubmit = () => {
+    if (isDataValid && publicKey) {
+      createPhoneBookEntry.mutateAsync({ content, userName, userNumber, user: publicKey });
+    }
+  }
 
   return (
-    <button
-      className="btn btn-xs lg:btn-md btn-primary"
-      onClick={() => initialize.mutateAsync(Keypair.generate())}
-      disabled={initialize.isPending}
-    >
-      Create {initialize.isPending && '...'}
-    </button>
+    <div>
+      <input className='input input-borderd' type='string' value={userName} onChange={(e) => setUserName(e.target.value)} placeholder='add user name' />
+      <input className='input input-borderd' type='string' value={userNumber} onChange={(e) => setuserNumber(e.target.value)} placeholder='add user mobile number' />
+      <textarea className='textarea textarea-borderd' value={content} onChange={(e) => setcontent(e.target.value)} placeholder='add user content' />
+
+      <button
+        className="btn btn-xs lg:btn-md btn-primary"
+        onClick={handleSubmit}
+        disabled={createPhoneBookEntry.isPending || !isDataValid}
+      >
+        Create {createPhoneBookEntry.isPending && '...'}
+      </button>
+    </div>
   );
 }
 
@@ -45,7 +64,7 @@ export function CounterList() {
         <span className="loading loading-spinner loading-lg"></span>
       ) : accounts.data?.length ? (
         <div className="grid md:grid-cols-2 gap-4">
-          {accounts.data?.map((account) => (
+          {accounts.data?.map((account: any) => (
             <CounterCard
               key={account.publicKey.toString()}
               account={account.publicKey}
@@ -65,16 +84,24 @@ export function CounterList() {
 function CounterCard({ account }: { account: PublicKey }) {
   const {
     accountQuery,
-    incrementMutation,
-    setMutation,
-    decrementMutation,
-    closeMutation,
+    updatePhoneBookEntry,
+    deletePhoneBookEntry,
   } = useCounterProgramAccount({ account });
 
-  const count = useMemo(
-    () => accountQuery.data?.count ?? 0,
-    [accountQuery.data?.count]
-  );
+  const { publicKey } = useWallet();
+  const [content, setContent] = useState("");
+
+  const userName = accountQuery.data?.userName;
+  const userNumber = accountQuery.data?.userNumber;
+
+
+  const isDataValid = userName?.trim() !== "" && userNumber?.trim() !== "" && content.trim() !== "";
+
+  const handleSubmit = () => {
+    if (isDataValid && publicKey && userName) {
+      updatePhoneBookEntry.mutateAsync({ content, userName, userNumber, user: publicKey });
+    }
+  }
 
   return accountQuery.isLoading ? (
     <span className="loading loading-spinner loading-lg"></span>
@@ -86,44 +113,26 @@ function CounterCard({ account }: { account: PublicKey }) {
             className="card-title justify-center text-3xl cursor-pointer"
             onClick={() => accountQuery.refetch()}
           >
-            {count}
+            {accountQuery.data?.userName}
           </h2>
+          <p>{accountQuery.data?.userNumber}</p>
+          <p>{accountQuery.data?.content}</p>
+
           <div className="card-actions justify-around">
+
+            <textarea className='textarea textarea-bordered' value={content} onChange={(e) => setContent(e.target.value)} placeholder='update user content' />
+
             <button
-              className="btn btn-xs lg:btn-md btn-outline"
-              onClick={() => incrementMutation.mutateAsync()}
-              disabled={incrementMutation.isPending}
+              className="btn btn-xs lg:btn-md btn-primary"
+              onClick={handleSubmit}
+              disabled={updatePhoneBookEntry.isPending || !isDataValid}
             >
-              Increment
+              update {updatePhoneBookEntry.isPending && '...'}
             </button>
-            <button
-              className="btn btn-xs lg:btn-md btn-outline"
-              onClick={() => {
-                const value = window.prompt(
-                  'Set value to:',
-                  count.toString() ?? '0'
-                );
-                if (
-                  !value ||
-                  parseInt(value) === count ||
-                  isNaN(parseInt(value))
-                ) {
-                  return;
-                }
-                return setMutation.mutateAsync(parseInt(value));
-              }}
-              disabled={setMutation.isPending}
-            >
-              Set
-            </button>
-            <button
-              className="btn btn-xs lg:btn-md btn-outline"
-              onClick={() => decrementMutation.mutateAsync()}
-              disabled={decrementMutation.isPending}
-            >
-              Decrement
-            </button>
+
           </div>
+
+
           <div className="text-center space-y-4">
             <p>
               <ExplorerLink
@@ -141,9 +150,11 @@ function CounterCard({ account }: { account: PublicKey }) {
                 ) {
                   return;
                 }
-                return closeMutation.mutateAsync();
+                if(userName){
+                  return deletePhoneBookEntry.mutateAsync({userName});
+                }    
               }}
-              disabled={closeMutation.isPending}
+              disabled={deletePhoneBookEntry.isPending}
             >
               Close
             </button>
