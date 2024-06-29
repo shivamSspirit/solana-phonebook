@@ -6,12 +6,12 @@ import { ellipsify } from '../ui/ui-layout';
 import { ExplorerLink } from '../cluster/cluster-ui';
 import { useWallet } from '@solana/wallet-adapter-react';
 import {
-  useCounterProgram,
-  useCounterProgramAccount,
+  usePhoneBookProgram,
+  usePhoneBookProgramAccount,
 } from './phonebook-data-access';
 
-export function CounterCreate() {
-  const { createPhoneBookEntry } = useCounterProgram();
+export function PhoneBookCreate() {
+  const { createPhoneBookEntry } = usePhoneBookProgram();
   const { publicKey } = useWallet();
   const [userName, setUserName] = useState("");
   const [userNumber, setuserNumber] = useState("");
@@ -27,12 +27,12 @@ export function CounterCreate() {
 
   return (
     <div>
-      <input className='input input-borderd' type='string' value={userName} onChange={(e) => setUserName(e.target.value)} placeholder='add user name' />
-      <input className='input input-borderd' type='string' value={userNumber} onChange={(e) => setuserNumber(e.target.value)} placeholder='add user mobile number' />
-      <textarea className='textarea textarea-borderd' value={content} onChange={(e) => setcontent(e.target.value)} placeholder='add user content' />
+      <input className='input input-borderd rounded-lg border border-gray-300 ml-3' type='string' value={userName} onChange={(e) => setUserName(e.target.value)} placeholder='add user name' />
+      <input className='input input-borderd rounded-lg border border-gray-300 ml-3' type='string' value={userNumber} onChange={(e) => setuserNumber(e.target.value)} placeholder='add user mobile number' />
+      <input className='textarea textarea-borderd rounded-lg border border-gray-300 ml-3' type='string' value={content} onChange={(e) => setcontent(e.target.value)} placeholder='add user content' />
 
       <button
-        className="btn btn-xs lg:btn-md btn-primary"
+        className="btn btn-xs lg:btn-md btn-primary mt-3"
         onClick={handleSubmit}
         disabled={createPhoneBookEntry.isPending || !isDataValid}
       >
@@ -42,8 +42,8 @@ export function CounterCreate() {
   );
 }
 
-export function CounterList() {
-  const { accounts, getProgramAccount } = useCounterProgram();
+export function PhoneBookList() {
+  const { accounts, getProgramAccount } = usePhoneBookProgram();
 
   if (getProgramAccount.isLoading) {
     return <span className="loading loading-spinner loading-lg"></span>;
@@ -65,7 +65,7 @@ export function CounterList() {
       ) : accounts.data?.length ? (
         <div className="grid md:grid-cols-2 gap-4">
           {accounts.data?.map((account: any) => (
-            <CounterCard
+            <PhoneBookCard
               key={account.publicKey.toString()}
               account={account.publicKey}
             />
@@ -81,12 +81,12 @@ export function CounterList() {
   );
 }
 
-function CounterCard({ account }: { account: PublicKey }) {
+function PhoneBookCard({ account }: { account: PublicKey }) {
   const {
     accountQuery,
     updatePhoneBookEntry,
     deletePhoneBookEntry,
-  } = useCounterProgramAccount({ account });
+  } = usePhoneBookProgramAccount({ account });
 
   const { publicKey } = useWallet();
   const [content, setContent] = useState("");
@@ -98,7 +98,7 @@ function CounterCard({ account }: { account: PublicKey }) {
   const isDataValid = userName?.trim() !== "" && userNumber?.trim() !== "" && content.trim() !== "";
 
   const handleSubmit = () => {
-    if (isDataValid && publicKey && userName) {
+    if (isDataValid && publicKey && userName && userNumber) {
       updatePhoneBookEntry.mutateAsync({ content, userName, userNumber, user: publicKey });
     }
   }
@@ -113,10 +113,10 @@ function CounterCard({ account }: { account: PublicKey }) {
             className="card-title justify-center text-3xl cursor-pointer"
             onClick={() => accountQuery.refetch()}
           >
-            {accountQuery.data?.userName}
+           UserName: {accountQuery.data?.userName}
           </h2>
-          <p>{accountQuery.data?.userNumber}</p>
-          <p>{accountQuery.data?.content}</p>
+          <p>User Mobile Number: {accountQuery.data?.userNumber}</p>
+          <p>PhoneBook Content: {accountQuery.data?.content}</p>
 
           <div className="card-actions justify-around">
 

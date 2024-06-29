@@ -15,13 +15,10 @@ export const PHONEBOOK_PROGRAM_ID = new PublicKey(idl.address);
 // This is a helper function to get the Counter Anchor program.
 // export function getCounterProgram(provider: AnchorProvider) {
 
-export function getCounterProgram(provider: AnchorProvider) {
+export function getPhoneBookProgram(provider: AnchorProvider) {
   return new Program(idl as Phonebook, provider);
 }
 
-//  return anchor.workspace.Phonebook as Program<Phonebook>;
-//  return new Program(PhoneBookIDL, provider);
-// }
 
 // This is a helper function to get the program ID for the Counter program depending on the cluster.
 export function getPhoneBookProgramId(cluster: Cluster) {

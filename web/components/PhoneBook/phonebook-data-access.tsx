@@ -1,31 +1,31 @@
 'use client';
 
 // getting in client
-import { PHONEBOOK_PROGRAM_ID , Phonebook, IDL,idl, getPhoneBookProgramId, getCounterProgram} from '@phonebook/anchor';
-
-import { Idl, Program } from '@coral-xyz/anchor';
+import { PHONEBOOK_PROGRAM_ID ,getPhoneBookProgram} from '@phonebook/anchor';
 import { useConnection } from '@solana/wallet-adapter-react';
-import { Cluster, Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';        
+import { PublicKey, SystemProgram } from '@solana/web3.js';
+import { useMutation, useQuery } from '@tanstack/react-query';      
 import toast from 'react-hot-toast';
 import { useCluster } from '../cluster/cluster-data-access';
 import { useAnchorProvider } from '../solana/solana-provider';
 import { useTransactionToast } from '../ui/ui-layout';
 
-export function useCounterProgram() {
+export function usePhoneBookProgram() {
   const { connection } = useConnection();
   const { cluster } = useCluster();
   const transactionToast = useTransactionToast();
+
   const provider = useAnchorProvider();
   const programId = PHONEBOOK_PROGRAM_ID;
-  const program  = getCounterProgram(provider);
+  const program  = getPhoneBookProgram(provider);
 
 
   const accounts = useQuery({
     queryKey: ['phonebook', 'all', { cluster }],
     queryFn: () => program.account.phoneBookState.all(),
   });
+
+  console.log("accounts",accounts??undefined);
 
   const getProgramAccount = useQuery({
     queryKey: ['get-program-account', { cluster }],
@@ -42,7 +42,7 @@ export function useCounterProgram() {
 
       return program.methods
         .createPhoneBookEntry(content, userName, userNumber)
-        .accounts({ phoneBook: PhonebookPda, user: user, systemProgram: SystemProgram.programId })
+        .accounts({ user: user })
         .rpc()
     },
 
@@ -67,10 +67,10 @@ export function useCounterProgram() {
   };
 }
 
-export function useCounterProgramAccount({ account }: { account: PublicKey }) {
+export function usePhoneBookProgramAccount({ account }: { account: PublicKey }) {
   const { cluster } = useCluster();
   const transactionToast = useTransactionToast();
-  const { program, accounts } = useCounterProgram();
+  const { program, accounts } = usePhoneBookProgram();
 
   const accountQuery = useQuery({
     queryKey: ['phonebook', 'fetch', { cluster, account }],
@@ -86,7 +86,7 @@ export function useCounterProgramAccount({ account }: { account: PublicKey }) {
       );
       return program.methods
         .updatePhoneBookEntry(content, userName, userNumber)
-        .accounts({ phoneBook: PhonebookPda, user: user, systemProgram:SystemProgram.programId })
+        .accounts({  user: user })
         .rpc()
     },
 
@@ -106,7 +106,7 @@ export function useCounterProgramAccount({ account }: { account: PublicKey }) {
   const deletePhoneBookEntry = useMutation({
     mutationKey: ['phonebook', 'deletePhoneBookEntry', { cluster, account }],
     mutationFn: async({userName}:{userName:string}) => {
-      return program.methods.deletePhoneBookEntry(userName).accounts({ phoneBook: account }).rpc()
+      return program.methods.deletePhoneBookEntry(userName).rpc()
     },
       onSuccess: (tx) => {
       transactionToast(tx);
