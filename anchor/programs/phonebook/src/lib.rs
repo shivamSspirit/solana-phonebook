@@ -10,7 +10,6 @@ pub mod phonebook {
 
     pub fn create_phone_book_entry(ctx: Context<CreatePhoneBookEntry>, content: String, user_name: String, user_number: String) -> Result<()> {
         let phone_book = &mut ctx.accounts.phone_book;
-        let user = &mut ctx.accounts.user;
 
         phone_book.content = content;
         phone_book.user_name = user_name;
@@ -23,9 +22,7 @@ pub mod phonebook {
 
     pub fn update_phone_book_entry(
         ctx: Context<UpdatePhoneBookEntry>,
-        content: String,
-        user_name: String, 
-        user_number: String
+        content: String
     ) -> Result<()> {
         msg!("PhoneBook Entry Updated");
         msg!("content: {}", content);
