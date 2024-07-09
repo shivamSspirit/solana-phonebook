@@ -36,7 +36,7 @@ export function PhoneBookCreate() {
         onClick={handleSubmit}
         disabled={createPhoneBookEntry.isPending || !isDataValid}
       >
-        Create {createPhoneBookEntry.isPending && '...'}
+        Create PhoneBook {createPhoneBookEntry.isPending && '...'}
       </button>
     </div>
   );
