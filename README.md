@@ -7,5 +7,5 @@ This repo contains learning content about Solana, you can build CRUD features an
 
 This quest is designed to introduce you to building on Solana. We provide complete code samples that you can modify, copy, and run directly on your machine. 
 
-Learn more about [here](https://solquest.tech/challenge/solana-phonebook)
+Learn more about [here](https://www.solanaquest.fun/challenge/solana-phonebook)
 
